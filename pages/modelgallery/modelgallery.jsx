@@ -63,6 +63,7 @@ const models = [
 export default function ModelGallery() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const imageRef = useRef();
+    const containerRef = useRef(null);
     const lastScrollTime = useRef(0);
     const scrollCooldown = 300;
 
@@ -89,6 +90,41 @@ export default function ModelGallery() {
         return () => ctx.revert();
     }, [currentIndex]);
 
+    // 👇 Touch event handlers for mobile swipe
+    useEffect(() => {
+        const container = containerRef.current;
+        let startY = 0;
+
+        const onTouchStart = (e) => {
+            startY = e.touches[0].clientY;
+        };
+
+        const onTouchEnd = (e) => {
+            const endY = e.changedTouches[0].clientY;
+            const diff = startY - endY;
+
+            if (Math.abs(diff) > 50) {
+                const now = Date.now();
+                if (now - lastScrollTime.current < scrollCooldown) return;
+                lastScrollTime.current = now;
+
+                if (diff > 0 && currentIndex < models.length - 1) {
+                    setCurrentIndex((prev) => prev + 1);
+                } else if (diff < 0 && currentIndex > 0) {
+                    setCurrentIndex((prev) => prev - 1);
+                }
+            }
+        };
+
+        container.addEventListener('touchstart', onTouchStart, { passive: true });
+        container.addEventListener('touchend', onTouchEnd, { passive: true });
+
+        return () => {
+            container.removeEventListener('touchstart', onTouchStart);
+            container.removeEventListener('touchend', onTouchEnd);
+        };
+    }, [currentIndex]);
+
     const infoTextStyle = {
         fontFamily: '"Lay Grotesk", sans-serif',
         fontSize: '18px',
@@ -108,10 +144,11 @@ export default function ModelGallery() {
 
     return (
         <div
+            ref={containerRef}
             onWheel={handleScroll}
             className="relative w-full h-screen bg-white text-black flex items-center justify-center overflow-hidden"
         >
-            {/* Previous image hint on mobile */}
+            {/* Mobile previous/next image hints */}
             {models[currentIndex - 1] && (
                 <img
                     src={models[currentIndex - 1].image}
@@ -120,8 +157,6 @@ export default function ModelGallery() {
                     style={{ height: '120px', objectFit: 'cover' }}
                 />
             )}
-
-            {/* Next image hint on mobile */}
             {models[currentIndex + 1] && (
                 <img
                     src={models[currentIndex + 1].image}
@@ -140,7 +175,7 @@ export default function ModelGallery() {
                 style={{ height: '550px' }}
             />
 
-            {/* Mobile Overlay */}
+            {/* Mobile info overlay */}
             <div
                 className="fixed bottom-0 left-0 w-full md:hidden flex flex-col items-center gap-1 px-4 py-4 backdrop-blur-lg bg-white/70 z-20"
                 style={{
@@ -163,7 +198,7 @@ export default function ModelGallery() {
                 </a>
             </div>
 
-            {/* Desktop Sidebar Name List */}
+            {/* Desktop: name sidebar */}
             <div className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 space-y-4">
                 {models.map((model, index) => (
                     <div
@@ -182,7 +217,7 @@ export default function ModelGallery() {
                 ))}
             </div>
 
-            {/* Desktop Side Images */}
+            {/* Desktop: surrounding images */}
             <div className="relative hidden md:flex items-center justify-center w-2/3" style={{ height: '600px' }}>
                 {models[currentIndex - 1] && (
                     <img
@@ -198,7 +233,6 @@ export default function ModelGallery() {
                         }}
                     />
                 )}
-
                 {models[currentIndex + 1] && (
                     <img
                         src={models[currentIndex + 1].image}
@@ -215,7 +249,7 @@ export default function ModelGallery() {
                 )}
             </div>
 
-            {/* Desktop Info Panel */}
+            {/* Desktop: Info panel */}
             <div
                 className="hidden md:flex flex-col gap-4 absolute right-4 top-1/2 transform -translate-y-1/2 max-w-xs select-none"
                 style={{ color: '#000000' }}
