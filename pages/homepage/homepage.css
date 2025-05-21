@@ -1,0 +1,89 @@
+.homepage {
+    background-image: url(https://i.imgur.com/HxJYsAm.jpeg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 40% 50%;
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    animation: panBackground 20s ease-in-out infinite alternate;
+    font-family: 'Helvetica Neue', sans-serif;
+}
+
+.mininav {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 2;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    max-width: 80%;
+}
+
+.mininav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mininav li {
+    color: black;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.mininav li:hover {
+    color: #333;
+    transform: translateX(5px);
+}
+
+@keyframes panBackground {
+    0% {
+        background-position: 40% 50%;
+    }
+    50% {
+        background-position: 50% 45%;
+    }
+    100% {
+        background-position: 60% 50%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .mininav {
+        bottom: 1rem;
+        left: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        max-width: 90%;
+    }
+
+    .mininav li {
+        font-size: 1.1rem;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.9px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .mininav {
+        bottom: 0.75rem;
+        left: 0.75rem;
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    .mininav li {
+        font-size: 1.2rem;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.9px;
+    }
+}
