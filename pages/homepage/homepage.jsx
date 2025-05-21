@@ -21,8 +21,8 @@ export default function HomePage() {
             <nav className="mininav" aria-label="Model categories navigation">
                 <ul>
                     <li><Link to="/models" className="text-black hover:text-pink-400">All</Link></li>
-                    <li><Link to="/males">Males</Link></li>
-                    <li><Link to="/females">Females</Link></li>
+                    <li><Link to="/males">Male</Link></li>
+                    <li><Link to="/females">Female</Link></li>
                     <li>Curvy</li>
                     <li>Get in touch</li>
                 </ul>
