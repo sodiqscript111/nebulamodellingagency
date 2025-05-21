@@ -62,10 +62,21 @@ const models = [
 
 export default function ModelGallery() {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const imageRef = useRef();
+    const prevIndexRef = useRef(0);
+
     const containerRef = useRef(null);
+    const desktopMainImageRef = useRef(null);
+    const mobileMainImageRef = useRef(null);
+    const desktopInfoRef = useRef(null);
+    const desktopPrevImageRef = useRef(null);
+    const desktopNextImageRef = useRef(null);
+    const mobilePrevHintRef = useRef(null);
+    const mobileNextHintRef = useRef(null);
+    const nameListRefs = useRef([]);
+    nameListRefs.current = [];
+
     const lastScrollTime = useRef(0);
-    const scrollCooldown = 300;
+    const scrollCooldown = 400;
 
     const handleScroll = (e) => {
         const now = Date.now();
@@ -80,19 +91,68 @@ export default function ModelGallery() {
     };
 
     useEffect(() => {
+        const direction = currentIndex > prevIndexRef.current ? 1 : (currentIndex < prevIndexRef.current ? -1 : 0);
+
+        const currentMainImage = window.innerWidth >= 768 ? desktopMainImageRef.current : mobileMainImageRef.current;
+
         const ctx = gsap.context(() => {
-            gsap.fromTo(
-                imageRef.current,
-                { y: 100, opacity: 0 },
-                { y: 0, opacity: 1, duration: 1.2, ease: 'power3.out' }
-            );
-        });
+            if (currentMainImage) {
+                const yStart = direction === 1 ? 70 : (direction === -1 ? -70 : (prevIndexRef.current === 0 && currentIndex === 0 ? 50 : 0));
+                const rotationStart = direction === 1 ? 8 : (direction === -1 ? -8 : 0);
+                const scaleStart = 0.9;
+
+                gsap.fromTo(
+                    currentMainImage,
+                    { y: yStart, opacity: 0, scale: scaleStart, rotation: rotationStart },
+                    { y: 0, opacity: 1, scale: 1, rotation: 0, duration: 1, ease: 'power3.out', delay: 0.05 }
+                );
+            }
+
+            if (desktopInfoRef.current && window.innerWidth >= 768) {
+                gsap.fromTo(
+                    gsap.utils.toArray(desktopInfoRef.current.children),
+                    { opacity: 0, x: 30 },
+                    { opacity: 1, x: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out', delay: 0.25 }
+                );
+            }
+
+            const sideImageCommonProps = { opacity: 0.3, scale: 1, duration: 0.7, ease: 'power2.out', delay: 0.2 };
+            if (desktopPrevImageRef.current && window.innerWidth >= 768) {
+                gsap.fromTo(desktopPrevImageRef.current,
+                    { opacity: 0, x: -25, scale: 0.9 },
+                    { ...sideImageCommonProps, x: 0 }
+                );
+            }
+            if (desktopNextImageRef.current && window.innerWidth >= 768) {
+                gsap.fromTo(desktopNextImageRef.current,
+                    { opacity: 0, x: 25, scale: 0.9 },
+                    { ...sideImageCommonProps, x: 0 }
+                );
+            }
+
+            if (mobilePrevHintRef.current && window.innerWidth < 768) {
+                gsap.fromTo(mobilePrevHintRef.current,
+                    { opacity: 0, y: -15 },
+                    { opacity: 0.5, y: 0, duration: 0.5, ease: 'sine.out', delay: 0.1 }
+                );
+            }
+            if (mobileNextHintRef.current && window.innerWidth < 768) {
+                gsap.fromTo(mobileNextHintRef.current,
+                    { opacity: 0, y: 15 },
+                    { opacity: 0.5, y: 0, duration: 0.5, ease: 'sine.out', delay: 0.1 }
+                );
+            }
+
+        }, containerRef.current || undefined);
+
+        prevIndexRef.current = currentIndex;
+
         return () => ctx.revert();
     }, [currentIndex]);
 
-    // 👇 Touch event handlers for mobile swipe
     useEffect(() => {
         const container = containerRef.current;
+        if (!container) return;
         let startY = 0;
 
         const onTouchStart = (e) => {
@@ -103,7 +163,7 @@ export default function ModelGallery() {
             const endY = e.changedTouches[0].clientY;
             const diff = startY - endY;
 
-            if (Math.abs(diff) > 50) {
+            if (Math.abs(diff) > 40) {
                 const now = Date.now();
                 if (now - lastScrollTime.current < scrollCooldown) return;
                 lastScrollTime.current = now;
@@ -123,93 +183,216 @@ export default function ModelGallery() {
             container.removeEventListener('touchstart', onTouchStart);
             container.removeEventListener('touchend', onTouchEnd);
         };
-    }, [currentIndex]);
+    }, [currentIndex, models.length, scrollCooldown]);
+
+    useEffect(() => {
+        if (window.innerWidth < 768) return;
+
+        const ctx = gsap.context(() => {
+            nameListRefs.current.forEach((nameEl, idx) => {
+                if (nameEl) {
+                    gsap.to(nameEl, {
+                        fontWeight: idx === currentIndex ? 700 : 400,
+                        opacity: idx === currentIndex ? 1 : 0.5,
+                        scale: idx === currentIndex ? 1.1 : 1,
+                        x: idx === currentIndex ? 8 : 0,
+                        color: idx === currentIndex ? '#000000' : '#333333',
+                        duration: 0.35,
+                        ease: 'sine.out'
+                    });
+                }
+            });
+        });
+        return () => ctx.revert();
+    }, [currentIndex, models.length]);
+
+    useEffect(() => {
+        const parallaxContainer = containerRef.current;
+        if (!parallaxContainer) return;
+
+        let currentMainImageForParallax = null;
+
+        const updateTarget = () => {
+            currentMainImageForParallax = window.innerWidth >= 768
+                ? desktopMainImageRef.current
+                : mobileMainImageRef.current;
+        }
+        updateTarget();
+
+        const handleMouseMove = (e) => {
+            if (!currentMainImageForParallax || window.getComputedStyle(currentMainImageForParallax).display === 'none') {
+                updateTarget();
+                if (!currentMainImageForParallax) return;
+            }
+
+            const { clientX, clientY } = e;
+            const { offsetWidth, offsetHeight } = parallaxContainer;
+
+            const xPercent = (clientX / offsetWidth - 0.5);
+            const yPercent = (clientY / offsetHeight - 0.5);
+
+            gsap.to(currentMainImageForParallax, {
+                rotationY: xPercent * 6,
+                rotationX: yPercent * -6,
+                transformPerspective: 1000,
+                duration: 0.8,
+                ease: 'power1.out',
+                overwrite: 'auto'
+            });
+        };
+
+        const handleMouseLeave = () => {
+            if (currentMainImageForParallax) {
+                gsap.to(currentMainImageForParallax, {
+                    rotationY: 0,
+                    rotationX: 0,
+                    duration: 0.8,
+                    ease: 'power1.out'
+                });
+            }
+        };
+
+        parallaxContainer.addEventListener('mousemove', handleMouseMove);
+        parallaxContainer.addEventListener('mouseleave', handleMouseLeave);
+        window.addEventListener('resize', updateTarget);
+
+
+        return () => {
+            parallaxContainer.removeEventListener('mousemove', handleMouseMove);
+            parallaxContainer.removeEventListener('mouseleave', handleMouseLeave);
+            window.removeEventListener('resize', updateTarget);
+            if (currentMainImageForParallax) {
+                gsap.set(currentMainImageForParallax, { rotationY: 0, rotationX: 0, x:0, y:0 });
+            }
+        };
+    }, []);
 
     const infoTextStyle = {
         fontFamily: '"Lay Grotesk", sans-serif',
         fontSize: '18px',
-        lineHeight: '13.2px',
+        lineHeight: '1.4',
         fontWeight: 400,
-        color: '#000000'
+        color: '#333333'
     };
 
     const nameStyle = {
         ...infoTextStyle,
         fontWeight: 700,
         fontSize: '20px',
-        marginBottom: '8px',
+        marginBottom: '10px',
         cursor: 'default',
-        userSelect: 'none'
+        userSelect: 'none',
+        color: '#000000'
     };
+
+    const addToNameRefs = (el) => {
+        if (el && !nameListRefs.current.includes(el)) {
+            nameListRefs.current.push(el);
+        }
+    };
+
 
     return (
         <div
             ref={containerRef}
             onWheel={handleScroll}
-            className="relative w-full h-screen bg-white text-black flex items-center justify-center overflow-hidden"
+            className="relative w-full h-screen bg-white text-black flex items-center justify-center overflow-hidden select-none"
         >
-            {/* Mobile previous/next image hints */}
             {models[currentIndex - 1] && (
                 <img
+                    ref={mobilePrevHintRef}
                     src={models[currentIndex - 1].image}
                     alt="previous"
-                    className="md:hidden absolute top-2 left-1/2 transform -translate-x-1/2 w-4/5 opacity-50 z-0 rounded-xl pointer-events-none select-none"
-                    style={{ height: '120px', objectFit: 'cover' }}
+                    className="md:hidden absolute top-2 left-1/2 transform -translate-x-1/2 w-4/5 opacity-50 z-0 rounded-xl pointer-events-none"
+                    style={{ height: '100px', objectFit: 'cover' }}
                 />
             )}
             {models[currentIndex + 1] && (
                 <img
+                    ref={mobileNextHintRef}
                     src={models[currentIndex + 1].image}
                     alt="next"
-                    className="md:hidden absolute bottom-2 left-1/2 transform -translate-x-1/2 w-4/5 opacity-50 z-0 rounded-xl pointer-events-none select-none"
-                    style={{ height: '120px', objectFit: 'cover' }}
+                    className="md:hidden absolute bottom-2 left-1/2 transform -translate-x-1/2 w-4/5 opacity-50 z-0 rounded-xl pointer-events-none"
+                    style={{ height: '100px', objectFit: 'cover' }}
                 />
             )}
 
-            {/* Main Image */}
+            <div className="hidden md:flex items-center justify-center w-full max-w-6xl gap-10 px-4">
+                {models[currentIndex - 1] && (
+                    <img
+                        ref={desktopPrevImageRef}
+                        src={models[currentIndex - 1].image}
+                        alt="prev"
+                        className="w-1/6 opacity-30 rounded-lg pointer-events-none"
+                        style={{ height: '380px', objectFit: 'cover' }}
+                    />
+                )}
+
+                <img
+                    ref={desktopMainImageRef}
+                    src={models[currentIndex].image}
+                    alt={models[currentIndex].name}
+                    className="w-1/2 max-w-md object-cover rounded-2xl shadow-2xl z-10 pointer-events-none"
+                    style={{ height: '550px' }}
+                />
+
+                {models[currentIndex + 1] && (
+                    <img
+                        ref={desktopNextImageRef}
+                        src={models[currentIndex + 1].image}
+                        alt="next"
+                        className="w-1/6 opacity-30 rounded-lg pointer-events-none"
+                        style={{ height: '380px', objectFit: 'cover' }}
+                    />
+                )}
+            </div>
+
             <img
-                ref={imageRef}
+                ref={mobileMainImageRef}
                 src={models[currentIndex].image}
                 alt={models[currentIndex].name}
-                className="w-5/6 max-w-md md:w-2/3 object-cover rounded-2xl shadow-xl z-10 select-none pointer-events-none"
-                style={{ height: '550px' }}
+                className="md:hidden w-4/5 max-w-[350px] object-cover rounded-2xl shadow-xl z-10 pointer-events-none fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[calc(50%+20px)]"
+                style={{ height: 'auto', aspectRatio: '3/4' }}
             />
 
-            {/* Mobile info overlay */}
+
             <div
-                className="fixed bottom-0 left-0 w-full md:hidden flex flex-col items-center gap-1 px-4 py-4 backdrop-blur-lg bg-white/70 z-20"
+                className="fixed bottom-0 left-0 w-full md:hidden flex flex-col items-center gap-1.5 px-6 py-5 z-20 rounded-t-lg"
                 style={{
-                    fontFamily: '"Lay Grotesk", sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    color: '#000000',
-                    userSelect: 'none'
+                    backdropFilter: 'blur(14px)',
+                    WebkitBackdropFilter: 'blur(14px)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
             >
-                <div>{models[currentIndex].name}</div>
+                <div style={{ ...nameStyle, fontSize: '18px', marginBottom: '4px', color: '#000' }}>
+                    {models[currentIndex].name}
+                </div>
                 <a
                     href={models[currentIndex].portfolioLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm underline font-medium"
-                    style={{ color: '#000000' }}
+                    style={{ color: '#000' }}
                 >
                     View Portfolio
                 </a>
             </div>
 
-            {/* Desktop: name sidebar */}
-            <div className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 space-y-4">
+
+            <div className="hidden md:block absolute left-6 top-1/2 transform -translate-y-1/2 space-y-3">
                 {models.map((model, index) => (
                     <div
-                        key={index}
+                        key={model.name}
+                        ref={addToNameRefs}
                         onClick={() => setCurrentIndex(index)}
                         style={{
                             ...infoTextStyle,
-                            fontWeight: index === currentIndex ? 700 : 400,
-                            opacity: index === currentIndex ? 1 : 0.4,
+                            fontWeight: 400,
+                            opacity: 0.5,
                             cursor: 'pointer',
-                            userSelect: 'none'
+                            transition: 'color 0.3s',
+                            padding: '4px 0',
                         }}
                     >
                         {model.name}
@@ -217,47 +400,11 @@ export default function ModelGallery() {
                 ))}
             </div>
 
-            {/* Desktop: surrounding images */}
-            <div className="relative hidden md:flex items-center justify-center w-2/3" style={{ height: '600px' }}>
-                {models[currentIndex - 1] && (
-                    <img
-                        src={models[currentIndex - 1].image}
-                        alt="prev"
-                        className="absolute w-1/4 opacity-40 rounded-lg select-none pointer-events-none"
-                        style={{
-                            top: '-40px',
-                            left: '10%',
-                            zIndex: 5,
-                            objectFit: 'cover',
-                            height: '400px'
-                        }}
-                    />
-                )}
-                {models[currentIndex + 1] && (
-                    <img
-                        src={models[currentIndex + 1].image}
-                        alt="next"
-                        className="absolute w-1/4 opacity-40 rounded-lg select-none pointer-events-none"
-                        style={{
-                            bottom: '-40px',
-                            right: '10%',
-                            zIndex: 5,
-                            objectFit: 'cover',
-                            height: '400px'
-                        }}
-                    />
-                )}
-            </div>
-
-            {/* Desktop: Info panel */}
-            <div
-                className="hidden md:flex flex-col gap-4 absolute right-4 top-1/2 transform -translate-y-1/2 max-w-xs select-none"
-                style={{ color: '#000000' }}
-            >
+            <div ref={desktopInfoRef} className="hidden md:flex flex-col gap-3 absolute right-6 top-1/2 transform -translate-y-1/2 max-w-xs">
                 <h3 style={nameStyle}>{models[currentIndex].name}</h3>
                 <p style={infoTextStyle}><strong>Height: </strong>{models[currentIndex].height}</p>
                 <p style={infoTextStyle}><strong>Age: </strong>{models[currentIndex].age}</p>
-                <p style={{ ...infoTextStyle, marginBottom: '16px' }}>
+                <p style={{ ...infoTextStyle, marginBottom: '12px' }}>
                     <strong>Measurements: </strong>{models[currentIndex].measurements}
                 </p>
                 <a
@@ -269,7 +416,7 @@ export default function ModelGallery() {
                         textDecoration: 'underline',
                         color: '#000000',
                         cursor: 'pointer',
-                        userSelect: 'none'
+                        fontWeight: 500
                     }}
                 >
                     View Portfolio
