@@ -347,11 +347,12 @@ export default function ModelGallery() {
                 )}
             </div>
 
+            {/* MODIFIED LINE BELOW */}
             <img
                 ref={mobileMainImageRef}
                 src={models[currentIndex].image}
                 alt={models[currentIndex].name}
-                className="md:hidden w-4/5 max-w-[350px] object-cover rounded-2xl shadow-xl z-10 pointer-events-none fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[calc(50%+20px)]"
+                className="md:hidden w-4/5 max-w-[350px] object-cover rounded-2xl shadow-xl z-10 pointer-events-none fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 style={{ height: 'auto', aspectRatio: '3/4' }}
             />
 
