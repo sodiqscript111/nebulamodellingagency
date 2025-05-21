@@ -1,15 +1,28 @@
-
 import { Link } from 'react-router-dom';
 import './homepage.css';
 
 export default function HomePage() {
     return (
         <div className="homepage">
+            <video
+                className="background-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                aria-hidden="true"
+                tabIndex={-1}
+            >
+                <source src="src/assets/homepage.mp4" type="video/mp4" />
+                {/* Fallback text for unsupported browsers */}
+                Your browser does not support the video tag.
+            </video>
+
             <nav className="mininav" aria-label="Model categories navigation">
                 <ul>
                     <li><Link to="/models" className="text-black hover:text-pink-400">All</Link></li>
-                    <li>Male</li>
-                    <li>Female</li>
+                    <li><Link to="/males">Males</Link></li>
+                    <li><Link to="/females">Females</Link></li>
                     <li>Curvy</li>
                     <li>Get in touch</li>
                 </ul>

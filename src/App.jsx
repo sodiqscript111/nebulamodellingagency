@@ -1,4 +1,5 @@
-
+import FeModelGallery from '../pages/females/female.jsx'
+import MeModelGallery from '../pages/male/male.jsx'
 import ModelGallery from '../pages/modelgallery/modelgallery.jsx'
 import './App.css'
 import './index.css'
@@ -11,6 +12,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/models" element={<ModelGallery />} />
+                <Route path="/females" element={<FeModelGallery />} />
+                <Route path="/males" element={<MeModelGallery />} />
             </Routes>
         </BrowserRouter>
     );
