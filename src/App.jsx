@@ -1,9 +1,9 @@
 
-import ModelGallery from '../../nebullamodellingagency/pages/modelgallery/modelgallery.jsx'
+import ModelGallery from '../pages/modelgallery/modelgallery.jsx'
 import './App.css'
 import './index.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import HomePage from "../../nebullamodellingagency/pages/homepage/homepage.jsx";
+import HomePage from "../pages/homepage/homepage.jsx";
 
 function App() {
     return (
