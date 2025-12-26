@@ -1,6 +1,51 @@
 @import "tailwindcss";
-body{
-    margin: 0;
-    padding: 0;
+
+@font-face {
+  font-family: 'Galgo';
+  src: url('./assets/fonts/Galgo-Regular.woff2') format('woff2'),
+    url('./assets/fonts/Galgo-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
 }
 
+@font-face {
+  font-family: 'Galgo';
+  src: url('./assets/fonts/Galgo-Bold.woff2') format('woff2'),
+    url('./assets/fonts/Galgo-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Galgo';
+  src: url('./assets/fonts/Galgo-Light.woff2') format('woff2'),
+    url('./assets/fonts/Galgo-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@theme {
+  --font-galgo: 'Galgo', sans-serif;
+}
+
+:root {
+  font-family: 'Galgo', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #000000;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: #000000;
+}
