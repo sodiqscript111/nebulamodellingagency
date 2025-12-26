@@ -6,10 +6,13 @@ import { ModelGallery } from './pages/ModelGallery';
 
 import { SphericalGallery } from './pages/SphericalGallery';
 
+import { ScrollToTop } from './components/ScrollToTop';
+
 const App: React.FC = () => {
     return (
         <Router>
-            <div className="relative w-screen overflow-x-hidden bg-black text-white selection:bg-white selection:text-black">
+            <ScrollToTop />
+            <div className="relative w-full min-h-screen overflow-x-hidden bg-black text-white selection:bg-white selection:text-black">
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/models" element={<ModelGallery />} />

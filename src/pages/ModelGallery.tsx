@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 
 // Importing all images (using a glob import would be cleaner but maintaining explicit control for now as based on previous patterns)
 // Ideally in a real app, this would be dynamic or from a CMS. 
@@ -33,7 +34,7 @@ export const ModelGallery: React.FC = () => {
     const decreaseGrid = () => setGridCols(prev => Math.max(1, prev - 1));
 
     return (
-        <div className="w-screen min-h-screen bg-black text-white pt-32 px-8">
+        <div className="w-full min-h-screen bg-black text-white pt-32 px-8">
             <Navbar /> {/* Reusing Navbar though it might overlay content, adding pt-32 to body */}
 
             <div className="fixed top-24 right-8 z-50 flex space-x-4 bg-black/50 backdrop-blur-md p-2 rounded-full border border-white/20">
@@ -62,11 +63,12 @@ export const ModelGallery: React.FC = () => {
                         <img
                             src={src}
                             alt={`Model ${index + 1}`}
-                            className="w-full h-full object-cover transform duration-500 group-hover:scale-105 filter grayscale hover:grayscale-0 transition-all"
+                            className="w-full h-full object-cover transform duration-500 group-hover:scale-105 transition-all"
                         />
                     </div>
                 ))}
             </div>
+            <Footer />
         </div>
     );
 };

@@ -74,12 +74,15 @@ export const SphericalGallery: React.FC = () => {
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
 
+        const isTouch = 'touches' in e;
+        const sensitivity = isTouch ? 0.002 : 0.005; // Slower on mobile
+
         const deltaX = clientX - lastMousePos.current.x;
         const deltaY = clientY - lastMousePos.current.y;
 
         setRotation(prev => ({
-            x: prev.x - deltaY * 0.005, // Invert Y axis for natural feel
-            y: prev.y + deltaX * 0.005
+            x: prev.x - deltaY * sensitivity,
+            y: prev.y + deltaX * sensitivity
         }));
 
         lastMousePos.current = { x: clientX, y: clientY };
@@ -119,7 +122,7 @@ export const SphericalGallery: React.FC = () => {
 
     return (
         <div
-            className="w-screen h-screen bg-black overflow-hidden relative perspective-container cursor-grab active:cursor-grabbing"
+            className="w-full h-screen bg-black overflow-hidden relative perspective-container cursor-grab active:cursor-grabbing touch-none"
             onMouseDown={handleMouseDown}
             onTouchStart={handleMouseDown}
         >
@@ -151,7 +154,7 @@ export const SphericalGallery: React.FC = () => {
                                     className="w-full h-full object-cover"
                                     draggable={false}
                                 />
-                                <div className="absolute bottom-0 left-0 w-full p-4 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div className="absolute bottom-0 left-0 w-full p-4 bg-black/60 backdrop-blur-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                                     <span className="text-white font-galgo text-lg tracking-widest block text-center border border-white/30 py-1 hover:bg-white hover:text-black transition-colors">
                                         VIEW PORTFOLIO
                                     </span>
