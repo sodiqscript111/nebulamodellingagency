@@ -21,16 +21,31 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, isMobile }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        if (isMobile && videoRef.current) {
-            videoRef.current.play().catch(e => console.log("Autoplay prevented", e));
-        } else if (!isMobile && videoRef.current) {
-            videoRef.current.pause();
+        const video = videoRef.current;
+        if (!video) return;
+
+        const playVideo = async () => {
+            try {
+                await video.play();
+            } catch (err) {
+                console.log("Autoplay prevented or interrupted", err);
+            }
+        };
+
+        if (isMobile) {
+            playVideo();
+        } else {
+            video.pause();
         }
     }, [isMobile]);
 
-    const handleMouseEnter = () => {
+    const handleMouseEnter = async () => {
         if (!isMobile && videoRef.current) {
-            videoRef.current.play().catch(e => console.log("Play failed", e));
+            try {
+                await videoRef.current.play();
+            } catch (err) {
+                console.log("Play failed on hover", err);
+            }
         }
     };
 

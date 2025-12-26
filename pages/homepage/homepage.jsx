@@ -11,6 +11,8 @@ export default function HomePage() {
                 muted
                 loop
                 playsInline
+                webkit-playsinline="true"
+                preload="auto"
                 aria-hidden="true"
                 tabIndex={-1}
             >
